@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/WindowsTop">
+        <file>res/WindowsTop.png</file>
+        <file>res/sound.wav</file>
+    </qresource>
+</RCC>
