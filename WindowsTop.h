@@ -1,4 +1,4 @@
-#pragma once
+О╩©#pragma once
 #include <QtWidgets/QWidget>
 #include "ui_WindowsTop.h"
 #include <qsystemtrayicon.h>
@@ -33,7 +33,7 @@ private:
 	void initUi();
 	void closeEvent(QCloseEvent* event);
 	void setHotkey(const QKeySequence& keySequence);
-	// ╢╟©з╬Д╠Зап╠М
+	// Г╙≈Е▐ёЕ▐╔Ф÷└Е┬≈Х║╗
 	QSet<void*> windowsSet;
 	QJsonConfig config{ QApplication::applicationDirPath() + "/config.json" };
 private slots:

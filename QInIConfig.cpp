@@ -1,4 +1,4 @@
-#include "QInIConfig.h"
+﻿#include "QInIConfig.h"
 
 bool QInIConfig::read(const QVariant& key, QVariant& value)
 {

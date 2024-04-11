@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "QConfig.h"
 #include <qsettings.h>
 
@@ -10,51 +10,51 @@ public:
 
 	~QInIConfig() {};
 	/**
-	 * @brief ¶ÁÈ¡ÅäÖÃÎÄ¼ş
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @return ÊÇ·ñ¶ÁÈ¡³É¹¦
+	 * @brief è¯»å–é…ç½®æ–‡ä»¶
+	 * @param key é”®
+	 * @param value å€¼
+	 * @return æ˜¯å¦è¯»å–æˆåŠŸ
 	 */
 	bool read(const QVariant& key, QVariant& value) override;
 	/**
-	 * @brief ¶ÁÈ¡ÅäÖÃÎÄ¼ş
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @return ÊÇ·ñ¶ÁÈ¡³É¹¦
+	 * @brief è¯»å–é…ç½®æ–‡ä»¶
+	 * @param key é”®
+	 * @param value å€¼
+	 * @return æ˜¯å¦è¯»å–æˆåŠŸ
 	 */
 	bool read(const QVariantList& keys, QVariant& value) override;
 	/**
-	 * @brief ¶ÁÈ¡ÅäÖÃÎÄ¼ş
-	 * @param key ¼ü
-	 * @return Öµ
+	 * @brief è¯»å–é…ç½®æ–‡ä»¶
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	QVariant read(const QVariant& key) override;
 	/**
-	 * @brief ¶ÁÈ¡ÅäÖÃÎÄ¼ş
-	 * @param key ¼ü
-	 * @return Öµ
+	 * @brief è¯»å–é…ç½®æ–‡ä»¶
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	QVariant read(const QVariantList& keys) override;
 	/**
-	 * @brief Ğ´ÈëÅäÖÃÎÄ¼ş
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param isAppend ÊÇ·ñ×·¼Ó
-	 * @return ÊÇ·ñĞ´Èë³É¹¦
+	 * @brief å†™å…¥é…ç½®æ–‡ä»¶
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param isAppend æ˜¯å¦è¿½åŠ 
+	 * @return æ˜¯å¦å†™å…¥æˆåŠŸ
 	 */
 	bool write(const QVariant& key, const QVariant& value, bool isAppend = true) override;
 	/**
-	 * @brief Ğ´ÈëÅäÖÃÎÄ¼ş
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param isAppend ÊÇ·ñ×·¼Ó
-	 * @return ÊÇ·ñĞ´Èë³É¹¦
+	 * @brief å†™å…¥é…ç½®æ–‡ä»¶
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param isAppend æ˜¯å¦è¿½åŠ 
+	 * @return æ˜¯å¦å†™å…¥æˆåŠŸ
 	 */
 	bool write(const QVariantList& keys, const QVariant& value, bool isAppend = true) override;
 private:
 	/**
-	 * @brief ½«ÁĞ±í×ª»»Îª×Ö·û´®
-	 * @param list ĞèÒª×ª»»µÄÁĞ±í
+	 * @brief å°†åˆ—è¡¨è½¬æ¢ä¸ºå­—ç¬¦ä¸²
+	 * @param list éœ€è¦è½¬æ¢çš„åˆ—è¡¨
 	 * @return QString
 	 */
 	QVariant listToValue(const QVariantList& list);
