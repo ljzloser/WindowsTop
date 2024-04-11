@@ -361,3 +361,15 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/.qtc_clangd
+/build-Total-Desktop_Qt_6_6_1_MSVC2019_64bit-Debug
+/build-WindowsTop-Debug
+/build-WindowsTop-Release
+/GeneratedFiles
+/Makefile
+/Makefile.Debug
+/Makefile.Release
+/Makefile.WindowsTop
+/Makefile.WindowsTop.Debug
+/Makefile.WindowsTop.Release
+/.qmake.stash

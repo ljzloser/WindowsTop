@@ -1,4 +1,7 @@
 ﻿#include "WindowsTop.h"
+#ifdef _WIN32
+#pragma comment  (lib, "User32.lib")
+#endif
 
 WindowsTop::WindowsTop(QWidget* parent)
 	: QWidget(parent)
@@ -9,6 +12,7 @@ WindowsTop::WindowsTop(QWidget* parent)
 	this->trayIcon->setToolTip("WindowsTop");
 	this->trayIcon->show();
 	this->initUi();
+	this->setWindowIcon(QIcon(":/WindowsTop/res/WindowsTop.png"));
 	this->initConnect();
 }
 
@@ -28,13 +32,15 @@ WindowsTop::~WindowsTop()
 void WindowsTop::initConnect() const
 {
 	connect(this->trayIcon, &QSystemTrayIcon::activated, this, &WindowsTop::onTrayIconActivated);
-	connect(this->hotkey, SIGNAL(activated()), this, SLOT(setWindowTop()));
+	connect(this->topHotkey, SIGNAL(activated()), this, SLOT(setWindowTop()));
+	connect(this->showHotkey, SIGNAL(activated()), this, SLOT(show()));
+	connect(this->topWindowTableWidget, &QTableWidget::customContextMenuRequested, this, &WindowsTop::showTableContextMenu);
 }
 
 void WindowsTop::initUi()
 {
 	QFormLayout* layout = new QFormLayout(this);
-
+#pragma region 开机自启
 	QComboBox* comboBox = new QComboBox(this);
 	comboBox->setObjectName("AutoRun");
 	comboBox->addItems({ "否", "是" });
@@ -47,7 +53,8 @@ void WindowsTop::initUi()
 	}
 	comboBox->setCurrentIndex(autoRun.toBool() ? 1 : 0);
 	connect(comboBox, &QComboBox::currentIndexChanged, this, &WindowsTop::autoRun);
-
+#pragma endregion
+#pragma region 播放提示音
 	QComboBox* playSoundComboBox = new QComboBox(this);
 	playSoundComboBox->setObjectName("playSound");
 	playSoundComboBox->addItems({ "否", "是" });
@@ -63,11 +70,34 @@ void WindowsTop::initUi()
 		{
 			this->config.write(playSoundComboBox->objectName(), index == 1);
 		});
-
+#pragma endregion
+#pragma region 设置窗口始终置顶
+	QComboBox* alwaysTopComboBox = new QComboBox(this);
+	alwaysTopComboBox->setObjectName("alwaysTop");
+	alwaysTopComboBox->addItems({ "否", "是" });
+	layout->addRow("设置窗口始终置顶", alwaysTopComboBox);
+	QVariant alwaysTop = config.read(alwaysTopComboBox->objectName());
+	if (!alwaysTop.isValid())
+	{
+		this->config.write(alwaysTopComboBox->objectName(), false);
+		alwaysTop = QVariant(false);
+	}
+	alwaysTopComboBox->setCurrentIndex(alwaysTop.toBool() ? 1 : 0);
+	connect(alwaysTopComboBox, &QComboBox::currentIndexChanged, [=](int index)
+		{
+			this->config.write(alwaysTopComboBox->objectName(), index == 1);
+			if (index == 1)
+				this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+			else
+				this->setWindowFlags(this->windowFlags() & ~Qt::WindowStaysOnTopHint);
+			this->show();
+		});
+#pragma endregion
+#pragma region 置顶快捷键
 	QKeySequenceEdit* keySequenceEdit = new QKeySequenceEdit(this);
-	this->hotkey = new QHotkey(this);
-	keySequenceEdit->setObjectName("Hotkey");
-	layout->addRow("快捷键", keySequenceEdit);
+	this->topHotkey = new QHotkey(this);
+	keySequenceEdit->setObjectName("topHotkey");
+	layout->addRow("置顶快捷键", keySequenceEdit);
 	QVariant hotkeyVar = config.read(keySequenceEdit->objectName());
 	if (!hotkeyVar.isValid())
 	{
@@ -75,8 +105,31 @@ void WindowsTop::initUi()
 		config.write(keySequenceEdit->objectName(), QKeySequence(Qt::CTRL | Qt::Key_T).toString());
 	}
 	keySequenceEdit->setKeySequence(hotkeyVar.toString());
-	this->hotkey->setShortcut(keySequenceEdit->keySequence(), true);
+	this->topHotkey->setShortcut(keySequenceEdit->keySequence(), true);
 	connect(keySequenceEdit, &QKeySequenceEdit::keySequenceChanged, this, &WindowsTop::setHotkey);
+#pragma endregion
+#pragma region 显示设置窗口快捷键
+	QKeySequenceEdit* showKeySequenceEdit = new QKeySequenceEdit(this);
+	this->showHotkey = new QHotkey(this);
+	showKeySequenceEdit->setObjectName("showHotkey");
+	layout->addRow("显示设置窗口快捷键", showKeySequenceEdit);
+	hotkeyVar = config.read(showKeySequenceEdit->objectName());
+	if (!hotkeyVar.isValid())
+	{
+		hotkeyVar = QKeySequence(Qt::CTRL | Qt::Key_H);
+		config.write(showKeySequenceEdit->objectName(), QKeySequence(Qt::CTRL | Qt::Key_H).toString());
+	}
+	showKeySequenceEdit->setKeySequence(hotkeyVar.toString());
+	this->showHotkey->setShortcut(showKeySequenceEdit->keySequence(), true);
+	connect(showKeySequenceEdit, &QKeySequenceEdit::keySequenceChanged, this, &WindowsTop::setHotkey);
+#pragma endregion
+#pragma region 置顶窗口列表
+	this->topWindowTableWidget = new QTableWidget(this);
+	layout->addRow(this->topWindowTableWidget);
+	// 只读
+	this->topWindowTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	this->topWindowTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+#pragma endregion
 
 	this->setLayout(layout);
 }
@@ -87,10 +140,43 @@ void WindowsTop::closeEvent(QCloseEvent* event)
 	event->ignore();
 }
 
+void WindowsTop::loadTable()
+{
+	this->topWindowTableWidget->setRowCount(0);
+	this->topWindowTableWidget->setColumnCount(3);
+	this->topWindowTableWidget->setHorizontalHeaderLabels({ "窗口句柄", "窗口标题", "窗口类名" });
+	for (auto it = this->windowsSet.begin(); it != this->windowsSet.end(); it++)
+	{
+#ifdef WIN32
+		HWND hwnd = (HWND)*it;
+		// 判断是否存在这个窗口
+		if (::IsWindow(hwnd))
+		{
+			// 获取窗口名称
+			LPWSTR title = new WCHAR[256];
+			::GetWindowTextW(hwnd, title, 256);
+			// 获取窗口类名
+			LPWSTR className = new WCHAR[256];
+			::GetClassNameW(hwnd, className, 256);
+			this->topWindowTableWidget->insertRow(this->topWindowTableWidget->rowCount());
+			this->topWindowTableWidget->setItem(this->topWindowTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number((int)hwnd)));
+			this->topWindowTableWidget->setItem(this->topWindowTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::fromWCharArray(title)));
+			this->topWindowTableWidget->setItem(this->topWindowTableWidget->rowCount() - 1, 2, new QTableWidgetItem(QString::fromWCharArray(className)));
+		}
+
+#endif // WIN32
+	}
+}
+
+void WindowsTop::showEvent(QShowEvent* event)
+{
+	this->loadTable();
+}
+
 void WindowsTop::setHotkey(const QKeySequence& keySequence)
 {
-	this->hotkey->setShortcut(keySequence, true);
-	this->config.write("Hotkey", keySequence.toString());
+	this->topHotkey->setShortcut(keySequence, true);
+	this->config.write(this->sender()->objectName(), keySequence.toString());
 }
 
 void WindowsTop::setWindowTop()
@@ -116,7 +202,7 @@ void WindowsTop::setWindowTop()
 		::SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		this->windowsSet.remove(hwnd);
 	}
-
+	this->loadTable();
 #endif // WIN32
 	if (this->config.read("playSound").toBool())
 	{
@@ -177,6 +263,33 @@ void WindowsTop::autoRun(bool isAutoRun)
 	}
 #endif
 	this->config.write("AutoRun", isAutoRun);
+}
+
+void WindowsTop::showTableContextMenu()
+{
+	QMenu menu;
+	QAction* deleteAction = menu.addAction("取消置顶");
+	connect(deleteAction, &QAction::triggered, this, [=]()
+		{
+			int row = this->topWindowTableWidget->currentRow();
+			QVariant var = this->topWindowTableWidget->item(row, 0)->data(Qt::ItemDataRole::DisplayRole);
+#ifdef WIN32
+			HWND hwnd = (HWND)var.toULongLong();
+			::SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+#endif // WIN32
+			this->windowsSet.remove(hwnd);
+			this->loadTable();
+		});
+	QAction* copyAction = menu.addAction("复制");
+	connect(copyAction, &QAction::triggered, this, [=]()
+		{
+			int row = this->topWindowTableWidget->currentRow();
+			int col = this->topWindowTableWidget->currentColumn();
+			QVariant var = this->topWindowTableWidget->item(row, col)->data(Qt::ItemDataRole::DisplayRole);
+			QApplication::clipboard()->setText(var.toString());
+		});
+
+	menu.exec(QCursor::pos());
 }
 
 void WindowsTop::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)

@@ -60,22 +60,24 @@
     <LibraryPath>$(LocalDebuggerWorkingDirectory)QHotkey\QHotkey\$(Configuration);$(LibraryPath)</LibraryPath>
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
-    <IncludePath>I:\project\C++\Qt\WindowsTop\QHotkey\QHotkey;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)QHotkey\QHotkey;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <LibraryPath>$(LocalDebuggerWorkingDirectory)QHotkey\QHotkey\$(Configuration);$(LibraryPath)</LibraryPath>
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
-    <IncludePath>I:\project\C++\Qt\WindowsTop\QHotkey\QHotkey;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)QHotkey\QHotkey;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>
-      <Command>xcopy /r /y $(LocalDebuggerWorkingDirectory)config.json $(TargetDir)
-xcopy /r /y $(LocalDebuggerWorkingDirectory)QHotkey\QHotkey\$(Configuration)\QHotkey1.dll $(TargetDir)</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd/d  $(TargetDir)
-$(QtDllPath)/windeployqt $(TargetFileName)</Command>
+      <Command>xcopy /r /y $(LocalDebuggerWorkingDirectory)config.json $(TargetDir)
+xcopy /r /y $(LocalDebuggerWorkingDirectory)pack.nsi $(TargetDir)
+xcopy /r /y $(LocalDebuggerWorkingDirectory)QHotkey\QHotkey\$(Configuration)\QHotkey1.dll $(TargetDir)</Command>
+      <Message>将配置文件和相关第三方dll复制到生成目录.</Message>
     </PostBuildEvent>
     <Link>
       <AdditionalDependencies>QHotkey1.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -83,12 +85,17 @@ $(QtDllPath)/windeployqt $(TargetFileName)</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEvent>
-      <Command>xcopy /r /y $(LocalDebuggerWorkingDirectory)config.json $(TargetDir)
-xcopy /r /y $(LocalDebuggerWorkingDirectory)QHotkey\QHotkey\$(Configuration)\QHotkey1.dll $(TargetDir)</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd/d  $(TargetDir)
-$(QtDllPath)/windeployqt $(TargetFileName)</Command>
+      <Command>xcopy /r /y $(LocalDebuggerWorkingDirectory)config.json $(TargetDir)
+xcopy /r /y $(LocalDebuggerWorkingDirectory)pack.nsi $(TargetDir)
+xcopy /r /y $(LocalDebuggerWorkingDirectory)QHotkey\QHotkey\$(Configuration)\QHotkey1.dll $(TargetDir)
+cd/d  $(TargetDir)
+$(QtDllPath)/windeployqt $(TargetFileName)
+"I:\Program Files (x86)\NSIS\makensis" pack.nsi</Command>
+      <Message>将配置文件和相关第三方dll复制到生成目录，移动到生成目录，然后执行对应版本的windeployqt</Message>
     </PostBuildEvent>
     <Link>
       <AdditionalDependencies>QHotkey1.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -146,6 +153,9 @@ $(QtDllPath)/windeployqt $(TargetFileName)</Command>
       <Project>{fcc2a4ae-608e-3fb8-96da-5bc841e434be}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="pack.nsi" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />
@@ -154,7 +164,7 @@ $(QtDllPath)/windeployqt $(TargetFileName)</Command>
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties config_1json__JsonSchema="https://alec016.github.io/Custom-Machinery/Json%20Schema/src/main/resources/schemas/custom_machinery_machine.json" />
+      <UserProperties config_1json__JsonSchema="https://json.schemastore.org/clang-format.json" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

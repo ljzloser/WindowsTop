@@ -1,4 +1,7 @@
 {
   "AutoRun": false,
-  "Hotkey": "Ctrl+G"
+  "alwaysTop": true,
+  "playSound": false,
+  "showHotkey": "Ctrl+H",
+  "topHotkey": "Ctrl+T"
 }

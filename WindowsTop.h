@@ -13,6 +13,8 @@
 #include <qmessagebox.h>
 #include <qwindow.h>
 #include <QSoundEffect>
+#include <qtablewidget.h>
+#include <QClipboard>
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -28,10 +30,14 @@ public:
 private:
 	Ui::WindowsTopClass ui;
 	QSystemTrayIcon* trayIcon;
-	QHotkey* hotkey;
+	QHotkey* topHotkey;
+	QHotkey* showHotkey;
+	QTableWidget* topWindowTableWidget;
 	void initConnect() const;
 	void initUi();
 	void closeEvent(QCloseEvent* event);
+	void loadTable();
+	void showEvent(QShowEvent* event);
 	void setHotkey(const QKeySequence& keySequence);
 	// 窗口句柄列表
 	QSet<void*> windowsSet;
@@ -40,4 +46,5 @@ private slots:
 	void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 	void autoRun(bool isAutoRun);
 	void setWindowTop();
+	void showTableContextMenu();
 };

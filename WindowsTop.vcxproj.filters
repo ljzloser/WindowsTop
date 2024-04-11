@@ -71,4 +71,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="pack.nsi">
+      <Filter>Other Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

@@ -3,6 +3,12 @@
 QJsonConfig::QJsonConfig(const QString& path)
 	: QConfig(path)
 {
+	QJsonDocument doc;
+	if (this->readJson().isEmpty())
+	{
+		QJsonObject obj;
+		this->saveFile(QJsonDocument(obj).toJson());
+	}
 }
 
 QJsonConfig::~QJsonConfig()
