@@ -75,5 +75,8 @@
     <None Include="pack.nsi">
       <Filter>Other Files</Filter>
     </None>
+    <None Include="README.md">
+      <Filter>Other Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
