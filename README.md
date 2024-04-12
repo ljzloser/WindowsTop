@@ -1,8 +1,41 @@
 # WindowsTop
-在根目录克隆QHotKey; git clone https://github.com/Skycoder42/QHotkey.git
-或者手动下载解压到根目录。
+
+To clone QHotKey into the root directory, run:
+
+```bash
+git clone https://github.com/Skycoder42/QHotkey.git
+```
+
+Alternatively, download and extract QHotKey manually into the root directory.
+
 ### Visual Studio
-	1、将下载的QHotKey使用VS转换为VS项目文件。
-	2、打开Total.sln。
+1. Convert the downloaded QHotKey into Visual Studio project files.
+2. Open `Total.sln`.
+3. Ensure Qt and NSIS environment variables are set for automatically executing windepolyqt and packaging into an installer after building the release version.
+
 ### Qt Creator
-	进入到Total目录后，打开Total.pro即可。
+Navigate to the `Total` directory and open `Total.pro`.
+
+This modification presents the instructions in a clearer and more professional layout, providing concise steps for both Visual Studio and Qt Creator users.
+
+
+
+# 窗口置顶
+
+在根目录克隆QHotKey：运行以下命令
+
+```
+git clone https://github.com/Skycoder42/QHotkey.git
+```
+
+或者手动下载解压QHotKey到根目录。
+
+### Visual Studio
+1. 将下载的QHotKey转换为Visual Studio项目文件。
+2. 打开 `Total.sln`。
+3. 确保设置了Qt和NSIS的环境变量，以便在发布版本生成后自动执行 `winplotqt` 并将其打包成安装程序。
+
+### Qt Creator
+进入 `Total` 目录并打开 `Total.pro`。
+
+这个更新的说明强调了为了让发布版本生成后自动执行 `winplotqt` 并打包成安装程序，需要设置Qt和NSIS环境变量。
