@@ -94,7 +94,7 @@ xcopy /r /y $(LocalDebuggerWorkingDirectory)pack.nsi $(TargetDir)
 xcopy /r /y $(LocalDebuggerWorkingDirectory)QHotkey\QHotkey\$(Configuration)\QHotkey1.dll $(TargetDir)
 cd/d  $(TargetDir)
 $(QtDllPath)/windeployqt $(TargetFileName)
-"I:\Program Files (x86)\NSIS\makensis" pack.nsi</Command>
+makensis pack.nsi</Command>
       <Message>将配置文件和相关第三方dll复制到生成目录，移动到生成目录，然后执行对应版本的windeployqt</Message>
     </PostBuildEvent>
     <Link>
