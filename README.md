@@ -16,9 +16,6 @@ Alternatively, download and extract QHotKey manually into the root directory.
 ### Qt Creator
 Navigate to the `Total` directory and open `Total.pro`.
 
-This modification presents the instructions in a clearer and more professional layout, providing concise steps for both Visual Studio and Qt Creator users.
-
-
 
 # 窗口置顶
 
@@ -37,5 +34,3 @@ git clone https://github.com/Skycoder42/QHotkey.git
 
 ### Qt Creator
 进入 `Total` 目录并打开 `Total.pro`。
-
-这个更新的说明强调了为了让发布版本生成后自动执行 `winplotqt` 并打包成安装程序，需要设置Qt和NSIS环境变量。
