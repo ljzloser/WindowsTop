@@ -26,10 +26,19 @@ SOURCES += ./WindowsTop.cpp \
     ./main.cpp
 FORMS += ./WindowsTop.ui
 RESOURCES += WindowsTop.qrc
+unix:!macx {
+    LIBS += -lX11
+}
+# win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/QHotKey/QHotKey/release/ -lQHotkey1
+# else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/QHotKey/QHotKey/debug/ -lQHotkey1
+# else:unix: LIBS += -L$$OUT_PWD/QHotKey/QHotKey/ -lQHotkey1
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/QHotKey/QHotKey/release/ -lQHotkey1
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/QHotKey/QHotKey/debug/ -lQHotkey1
-else:unix: LIBS += -L$$OUT_PWD/QHotKey/QHotKey/ -lQHotkey1
+# INCLUDEPATH += $$PWD/../QHotKey/QHotKey
+# DEPENDPATH += $$PWD/../QHotKey/QHotKey
 
-INCLUDEPATH += $$PWD/QHotKey/QHotKey
-DEPENDPATH += $$PWD/QHotKey/QHotKey
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/QHotkey/QHotkey/release/ -lQHotkey
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/QHotkey/QHotkey/debug/ -lQHotkey
+else:unix: LIBS += -L$$OUT_PWD/QHotkey/QHotkey/ -lQHotkey
+
+INCLUDEPATH += $$PWD/QHotkey/QHotkey
+DEPENDPATH += $$PWD/QHotkey/QHotkey

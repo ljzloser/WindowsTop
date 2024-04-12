@@ -16,7 +16,6 @@ Alternatively, download and extract QHotKey manually into the root directory.
 ### Qt Creator
 Navigate to the `Total` directory and open `Total.pro`.
 
-
 # 窗口置顶
 
 在根目录克隆QHotKey：运行以下命令

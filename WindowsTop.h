@@ -17,6 +17,10 @@
 #include <QClipboard>
 #ifdef _WIN32
 #include <Windows.h>
+#elif __linux__
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
 #endif
 
 class WindowsTop : public QWidget
@@ -40,11 +44,11 @@ private:
 	void showEvent(QShowEvent* event);
 	void setHotkey(const QKeySequence& keySequence);
 	// 窗口句柄列表
-	QSet<void*> windowsSet;
+    QSet<int> windowsSet;
 	QJsonConfig config{ QApplication::applicationDirPath() + "/config.json" };
 private slots:
 	void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
-	void autoRun(bool isAutoRun);
+    void autoRun(int isAutoRun);
 	void setWindowTop();
 	void showTableContextMenu();
 };

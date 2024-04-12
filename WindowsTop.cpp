@@ -159,12 +159,47 @@ void WindowsTop::loadTable()
 			LPWSTR className = new WCHAR[256];
 			::GetClassNameW(hwnd, className, 256);
 			this->topWindowTableWidget->insertRow(this->topWindowTableWidget->rowCount());
-			this->topWindowTableWidget->setItem(this->topWindowTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number((int)hwnd)));
+			this->topWindowTableWidget->setItem(this->topWindowTableWidget->rowCount() - 1, 0,
+				new QTableWidgetItem(QString("%1").arg((int)hwnd, 8, 16, QChar('0')).toUpper()));
 			this->topWindowTableWidget->setItem(this->topWindowTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::fromWCharArray(title)));
 			this->topWindowTableWidget->setItem(this->topWindowTableWidget->rowCount() - 1, 2, new QTableWidgetItem(QString::fromWCharArray(className)));
 		}
 
-#endif // WIN32
+#elif __linux__
+		Display* display = XOpenDisplay(NULL); // 打开默认的display
+		XWindowAttributes attributes;
+		Window window = (Window)*it;
+		if (XGetWindowAttributes(display, window, &attributes)) {
+			XTextProperty windowTitleProp;
+			char* windowTitle = NULL;
+			if (XGetWMName(display, window, &windowTitleProp) && windowTitleProp.value && windowTitleProp.nitems) {
+				windowTitle = (char*)windowTitleProp.value;
+			}
+
+			XClassHint classHint;
+			char* windowClass = NULL;
+			if (XGetClassHint(display, window, &classHint) && classHint.res_class) {
+				windowClass = classHint.res_class;
+			}
+
+			int newRow = topWindowTableWidget->rowCount();
+			topWindowTableWidget->insertRow(newRow);
+			topWindowTableWidget->setItem(newRow, 0, new QTableWidgetItem(QString::number((qlonglong)window, 16).toUpper()));
+			topWindowTableWidget->setItem(newRow, 1, new QTableWidgetItem(QString::fromUtf8(windowTitle)));
+			topWindowTableWidget->setItem(newRow, 2, new QTableWidgetItem(QString::fromUtf8(windowClass)));
+
+			if (windowTitle) {
+				XFree(windowTitle);
+			}
+			if (windowClass) {
+				XFree(windowClass);
+			}
+			if (classHint.res_name) {
+				XFree(classHint.res_name);
+			}
+		}
+		XCloseDisplay(display); // 关闭display
+#endif
 	}
 }
 
@@ -195,15 +230,66 @@ void WindowsTop::setWindowTop()
 	if (!isTopmost)
 	{
 		::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-		this->windowsSet.insert(hwnd);
+		this->windowsSet.insert((int)hwnd);
 	}
 	else
 	{
 		::SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-		this->windowsSet.remove(hwnd);
+		this->windowsSet.remove((int)hwnd);
 	}
+#elif (__linux__)
+	Display* display = XOpenDisplay(nullptr);
+	if (!display) return;
+	Window root = DefaultRootWindow(display);
+	QPoint pos = QCursor::pos();
+	Window window;
+	Window child;
+	int x, y;
+	unsigned int mask;
+	if (XQueryPointer(display, root, &window, &child, &x, &y, &x, &y, &mask))
+	{
+		if (child) {
+			window = child; // 若有子窗口，则child为鼠标下的窗口
+			int id = (int)window;
+
+			XEvent event;
+			memset(&event, 0, sizeof(event));
+
+			XWindowAttributes attributes;
+			XGetWindowAttributes(display, window, &attributes);
+
+			if (attributes.map_state == IsViewable && attributes.override_redirect == False) {
+				// If the window is currently on top, lower it
+				event.xclient.type = ClientMessage;
+				event.xclient.window = window;
+				event.xclient.message_type = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
+				event.xclient.format = 32;
+				event.xclient.data.l[0] = 3; // 3 indicates "request to lower window"
+				event.xclient.data.l[1] = CurrentTime;
+				this->windowsSet.remove(id);
+			}
+			else {
+				// If the window is not on top, raise it
+				event.xclient.type = ClientMessage;
+				event.xclient.window = window;
+				event.xclient.message_type = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
+				event.xclient.format = 32;
+				event.xclient.data.l[0] = 2; // 2 indicates "request to activate window"
+				event.xclient.data.l[1] = CurrentTime;
+				this->windowsSet.insert(id);
+			}
+
+			XSendEvent(display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &event);
+			XFlush(display);
+		}
+		else
+		{
+			return;
+		}
+	}
+	XCloseDisplay(display);
+#endif
 	this->loadTable();
-#endif // WIN32
 	if (this->config.read("playSound").toBool())
 	{
 		QSoundEffect* startSound = new QSoundEffect();
@@ -217,7 +303,7 @@ void WindowsTop::setWindowTop()
 	}
 }
 
-void WindowsTop::autoRun(bool isAutoRun)
+void WindowsTop::autoRun(int isAutoRun)
 {
 	QString appPath = QCoreApplication::applicationFilePath();
 
@@ -273,11 +359,13 @@ void WindowsTop::showTableContextMenu()
 		{
 			int row = this->topWindowTableWidget->currentRow();
 			QVariant var = this->topWindowTableWidget->item(row, 0)->data(Qt::ItemDataRole::DisplayRole);
+			QString hex = var.toString();
 #ifdef WIN32
-			HWND hwnd = (HWND)var.toULongLong();
+			bool ok;
+			HWND hwnd = (HWND)hex.toULongLong(&ok, 16);
 			::SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+			this->windowsSet.remove((int)hwnd);
 #endif // WIN32
-			this->windowsSet.remove(hwnd);
 			this->loadTable();
 		});
 	QAction* copyAction = menu.addAction("复制");
