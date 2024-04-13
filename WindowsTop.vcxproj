@@ -154,6 +154,7 @@ makensis pack.nsi</Command>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="pack.nsi" />
     <None Include="README.md" />
   </ItemGroup>

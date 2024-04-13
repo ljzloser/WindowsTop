@@ -2,6 +2,7 @@
 #ifdef _WIN32
 #pragma comment  (lib, "User32.lib")
 #endif
+
 static QString truncateString(const QString& str, int length)
 {
 	QString truncatedStr;
@@ -11,8 +12,9 @@ static QString truncateString(const QString& str, int length)
 		QString truncatedStr = str.left(static_cast<qsizetype>(length) - 3) + "..."; // 留出三个位置给 "..."
 	return truncatedStr;
 }
+
 WindowsTop::WindowsTop(QWidget* parent)
-	: QWidget(parent)
+	: QWidget(parent), config(QApplication::applicationDirPath() + "/config.json")
 {
 	ui.setupUi(this);
 	this->trayIcon = new QSystemTrayIcon(this);
@@ -260,7 +262,7 @@ void WindowsTop::setWindowTop()
 	if (XQueryPointer(display, root, &window, &child, &x, &y, &x, &y, &mask))
 	{
 		if (child) {
-			window = child; // 若有子窗口，则child为鼠标下的窗口
+			window = child; // 若有子窗口，则 child为鼠标下的窗口
 			int id = (int)window;
 
 			XEvent event;
@@ -320,7 +322,7 @@ void WindowsTop::setWindowTop()
 		this->trayIcon->showMessage(isTopmostString, context, QSystemTrayIcon::Information, 1000);
 		qDebug() << windowInfo.toJson(QJsonDocument::Compact);
 	}
-}
+	}
 
 void WindowsTop::autoRun(int isAutoRun)
 {
@@ -334,7 +336,7 @@ void WindowsTop::autoRun(int isAutoRun)
 	else
 		settings.remove("WindowsTop");
 #elif defined(__linux__)
-	QString autostartPath = QDir::homePath() + "/.config/autostart/";
+	QString autostartPath = QDir::homePath() + "/.config/autoStart/";
 	QString desktopFileName = "WindowsTop.desktop";
 	QString desktopFileContent = QString(
 		"[Desktop Entry]\n"
@@ -342,13 +344,13 @@ void WindowsTop::autoRun(int isAutoRun)
 		"Exec=%1\n"
 		"Hidden=false\n"
 		"NoDisplay=false\n"
-		"X-GNOME-Autostart-enabled=true\n"
+		"X-GNOME-AutoStart-enabled=true\n"
 		"Name[en_US]=WindowsTop\n"
 	).arg(appPath);
 
 	QDir autostartDir(autostartPath);
 	if (!autostartDir.exists()) {
-		QDir().mkpath(autostartPath); // Ensure the autostart directory exists
+		QDir().mkpath(autostartPath); // Ensure the autoStart directory exists
 	}
 
 	QString desktopFilePath = autostartPath + desktopFileName;
@@ -365,7 +367,7 @@ void WindowsTop::autoRun(int isAutoRun)
 		if (desktopFile.exists()) {
 			QFile::remove(desktopFilePath);
 		}
-	}
+}
 #endif
 	this->config.write("AutoRun", isAutoRun);
 }
@@ -470,7 +472,7 @@ void WindowsTop::WindowInfo::init()
 	}
 
 #elif __linux__
-	Display* display = XOpenDisplay(NULL); // 打开默认的display
+	Display* display = XOpenDisplay(NULL); // 打开默认的 display
 	XWindowAttributes attributes;
 	Window window = (Window)this->id;
 	if (XGetWindowAttributes(display, window, &attributes)) {
@@ -500,6 +502,6 @@ void WindowsTop::WindowInfo::init()
 			XFree(classHint.res_name);
 		}
 	}
-	XCloseDisplay(display); // 关闭display
+	XCloseDisplay(display); // 关闭 display
 #endif
 }
