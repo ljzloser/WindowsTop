@@ -9,7 +9,6 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
 SetCompressor lzma
-
 ; ------ MUI 现代界面定义 (1.67 版本以上兼容) ------
 !include "MUI.nsh"
 

@@ -165,7 +165,7 @@ makensis pack.nsi</Command>
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties config_1json__JsonSchema="https://json.schemastore.org/clang-format.json" />
+      <UserProperties />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
